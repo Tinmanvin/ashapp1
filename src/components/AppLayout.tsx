@@ -50,7 +50,7 @@ export default function AppLayout() {
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="font-clash text-sub font-bold tracking-tight text-foreground">
-            ASH.TV
+            BlackMagic
           </span>
         </div>
 
