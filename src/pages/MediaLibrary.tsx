@@ -12,6 +12,9 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useProcessingStore } from "../store/processingStore";
+import { DISPLAY_NAME_TO_PLATFORM } from "../lib/captionPrompts";
 
 type AssetType = "VIDEO" | "IMAGE" | "CLIP";
 interface Asset {
@@ -56,9 +59,18 @@ const platforms = [
 ];
 
 export default function MediaLibrary() {
+  const navigate = useNavigate();
+  const { setProcessingJob } = useProcessingStore();
   const [selected, setSelected] = useState<number[]>([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [activePlatforms, setActivePlatforms] = useState<string[]>([]);
+
+  const handleProcess = () => {
+    const assets = mockAssets.filter(a => selected.includes(a.id));
+    const platforms = activePlatforms.map(name => DISPLAY_NAME_TO_PLATFORM[name] ?? name);
+    setProcessingJob(assets, platforms);
+    navigate("/processing");
+  };
 
   const toggleSelect = (id: number) => {
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -265,6 +277,7 @@ export default function MediaLibrary() {
               {/* Process CTA */}
               <div className="mt-auto pt-6">
                 <button
+                  onClick={handleProcess}
                   disabled={activePlatforms.length === 0}
                   className={`w-full rounded-full py-3 text-sub font-medium transition-all flex items-center justify-center gap-2 ${
                     activePlatforms.length > 0
