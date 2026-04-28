@@ -1,11 +1,17 @@
 import OpenAI from 'openai'
 import { PLATFORM_RULES, Platform } from './captionPrompts'
 
-// dangerouslyAllowBrowser: this is an internal tool for Ash, not a public app
-const client = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY as string,
-  dangerouslyAllowBrowser: true,
-})
+// Lazy-init so a missing key doesn't crash the bundle at module load time
+let _client: OpenAI | null = null
+function getClient(): OpenAI {
+  if (!_client) {
+    _client = new OpenAI({
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY as string,
+      dangerouslyAllowBrowser: true,
+    })
+  }
+  return _client
+}
 
 export async function generateCaption(
   assetName: string,
@@ -14,7 +20,7 @@ export async function generateCaption(
 ): Promise<string> {
   const { systemPrompt } = PLATFORM_RULES[platform]
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: systemPrompt },
